@@ -1,0 +1,34 @@
+from scapy.all import sniff
+from scapy.layers.inet import IP, TCP, UDP, ICMP
+
+def process_packet(packet):
+    """
+    Function to process captured packets and extract relevant information.
+    """
+    if packet.haslayer(IP):
+        ip_layer = packet[IP]
+        src_ip = ip_layer.src
+        dst_ip = ip_layer.dst
+        proto = ip_layer.proto
+
+        print(f"[+] IP Packet: {src_ip} -> {dst_ip} | Protocol: {proto}")
+
+        # Handle specific protocols
+        if proto == 6 and packet.haslayer(TCP):  # TCP Protocol
+            tcp_layer = packet[TCP]
+            print(f"    TCP Packet: Src Port {tcp_layer.sport}, Dst Port {tcp_layer.dport}")
+        elif proto == 17 and packet.haslayer(UDP):  # UDP Protocol
+            udp_layer = packet[UDP]
+            print(f"    UDP Packet: Src Port {udp_layer.sport}, Dst Port {udp_layer.dport}")
+        elif proto == 1 and packet.haslayer(ICMP):  # ICMP Protocol
+            print("    ICMP Packet Detected")
+
+# Capture packets on a specific interface
+def start_sniffer(interface):
+    print(f"[*] Starting network sniffer on {interface}...")
+    sniff(iface=interface, prn=process_packet, store=False)
+
+if __name__ == "__main__":
+    # Replace with your network interface (e.g., eth0, wlan0)
+    interface = input("Enter the network interface (e.g., eth0, wlan0): ")
+    start_sniffer(interface)
